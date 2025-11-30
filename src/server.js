@@ -19,6 +19,8 @@ const DEFAULT_ALLOWED = [
   "http://localhost:3000",
   "http://127.0.0.1:3000",
   "https://easytax-jy4y.onrender.com",
+  "https://easytax-web.com",
+  "https://www.easytax-web.com",
 ];
 
 const ENV_ALLOWED = (process.env.CORS_ORIGINS || "")
@@ -32,6 +34,7 @@ const corsOptions = {
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
     if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    console.log("❌ CORS blocked origin:", origin);
     return callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
@@ -43,7 +46,7 @@ app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
 app.use((req, res, next) => {
-  res.header("Vary", "Origin");
+  res.header("Vvary", "Origin");
   next();
 });
 
@@ -83,7 +86,9 @@ app.post("/api/forms", async (req, res) => {
     });
 
     const emailTo = notify.emailTo || "dorohana212@gmail.com";
-    await sendFormEmail(submission, { emailTo });
+    sendFormEmail(submission, { emailTo }).catch((err) => {
+      console.error("❌ Error sending form email:", err.message);
+    });
 
     return res.status(201).json({
       ok: true,
